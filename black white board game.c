@@ -71,6 +71,59 @@ void popCoord(){
 	//after calling this function, temp node pointer will now hold the coordinates.
 }
 
+
+// GotoXY function used by draw_board
+void gotoxy(int x, int y) {
+    COORD coord;
+    coord.X = x;
+    coord.Y = y;
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+}
+
+// draw_board implementation
+void draw_board(int board[][20], int size) {
+    int i, r, f, square_start_y = 5;
+
+    system("cls");
+
+    // Displays file labels
+    gotoxy(26, 4);
+    for (i = 0; i < size; i++) {
+        printf(" %d  ", i);
+    }
+
+    for (r = 0; r < size; r++) {
+        int square_start_x = 25;
+
+        // Displays rank labels
+        gotoxy(square_start_x - 2, square_start_y + 1);
+        printf("%d", r);
+
+        for (f = 0; f < size; f++) {
+            gotoxy(square_start_x, square_start_y);
+            printf("+---+");
+
+            gotoxy(square_start_x, square_start_y + 1);
+            char disp;
+            if (board[f][r] == 1)
+                disp = 'O';
+            else if (board[f][r] == 2)
+                disp = '0';
+            else
+                disp = ' ';
+            printf("| %c |", disp);
+
+            gotoxy(square_start_x, square_start_y + 2);
+            printf("+---+");
+
+            square_start_x += 4;
+        }
+
+        square_start_y += 2;
+    }
+}
+
+
 int main(){
 	int size;
 	char name1[20], name2[20];
@@ -82,16 +135,16 @@ int main(){
 	scanf("%d", &size);
 	getchar();
 	
-	int coordBoard[size][size];
+//	int coordBoard[size][size];
 	
 	printf("Enter name of Player 1 (White) => ");
 	gets(name1);
 	printf("Enter name of Player 2 (Black) => ");
 	gets(name2);
 	
-	//initialize board state
+	int coordBoard[20][20] = { 0 }; // 20 by 20 max
 	system("cls");
-	//insert drawBoard function
+	draw_board(coordBoard, size);
 	
 	while(1){
 		// initialize player variables
@@ -115,17 +168,17 @@ int main(){
 		}
 		
 		// Move picking
-		printf("%s's turn. Pick a coordinate: ", curName);
+		printf("\n%s's turn. Pick a coordinate: ", curName);
 		scanf("%d %d", &ix, &iy);
 		
 		//check if coordinate picked is occupied
 		if (coordBoard[ix][iy] != 0){
-			printf("That coordinate is already occupied. Try again.");
+			printf("\nThat coordinate is already occupied. Try again.");
 			continue;
 		}else{
 			
 			coordBoard[ix][iy] = player;
-			//drawboard
+			draw_board(coordBoard, size);
 			
 			//first add to count
 			switch (player){
@@ -157,6 +210,16 @@ int main(){
 						//move to next cell
 						curX += moveX[i];
 						curY += moveY[i];
+						
+						//decrease piece count of opposing player
+						switch (player){
+							case 1:
+								countBlack--;
+								break;
+							case 2:
+								countWhite--;
+								break;
+							}
 					}else if (coordBoard[curX][curY] == player){
 						while(TOP != NULL){
 							popCoord();
@@ -170,6 +233,8 @@ int main(){
 									countBlack++;
 									break;
 							}
+
+							
 							//decrease the counter for the opposing player
 							switch (oppPlayer){
 								case 1:
@@ -180,6 +245,7 @@ int main(){
 									break;
 							}
 							//drawboard
+              draw_board(coordBoard, size);
 						}
 						break;
 					}	
