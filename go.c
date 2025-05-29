@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <windows.h>
+#include <time.h>
 #include <string.h>
 #include <math.h>
 #include <mem.h>
@@ -12,13 +13,15 @@ Explanation of functions and code structure:
 		Move checker: checks if a move encloses opposing pieces. Uses a current var as marker of the current coordinate being checked.
 		Checks for every direction (8), and goes through the ff. condition each time a direction is checked:
 			Check if current var is out of bounds !(>= 0 || <= n - 1) - break
+			Check if current var is the same color, but adjacent - break
 			Check if current var is 0 - break
 			Check if current var is opposing color - append current var to an memory stack
 			Check if current var is current color:
-				if 1st iteration - break - means current var is the same color but is just adjacent to the piece placed.
 				else - change the states of the coordinates in the memory array to the state of the piece placed, break.
 			After break - clear memory stack
 	Bakit stacks? Can adapt to changing board sizes.
+	
+	-- Gio
 	
 */
 
@@ -57,6 +60,7 @@ void createAndPush(int x, int y){
 
 void popCoord(){
 	
+	popNode = TOP;
 	TOP = TOP->next;
 	popNode->next = NULL;
 	//reassign the values of popNode to temp to return
@@ -71,6 +75,12 @@ void popCoord(){
 	//after calling this function, temp node pointer will now hold the coordinates.
 }
 
+void clearStack(){
+	popNode = TOP;
+	TOP = TOP->next;
+	popNode->next = NULL;
+	free(popNode);
+}
 
 // GotoXY function used by draw_board
 void gotoxy(int x, int y) {
@@ -79,6 +89,73 @@ void gotoxy(int x, int y) {
     coord.Y = y;
     SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
+
+//ascii
+
+void print_ascii_art() {
+
+    int start_x = 40; 
+    int start_y = 5;  // Adjusted to give more space from the top
+
+    // Print top padding 
+    gotoxy(start_x, start_y);
+    printf("                                             \n");
+    gotoxy(start_x, start_y + 1);
+    printf("                                             \n");
+
+    // main ascii art
+    gotoxy(start_x, start_y + 2);
+    printf("        GGGGGGGGGGGGG     OOOOOOOOO          \n");
+    gotoxy(start_x, start_y + 3);
+    printf("     GGG::::::::::::G   OO:::::::::OO        \n");
+    gotoxy(start_x, start_y + 4);
+    printf("   GG:::::::::::::::G OO:::::::::::::OO      \n");
+    gotoxy(start_x, start_y + 5);
+    printf("  G:::::GGGGGGGG::::GO:::::::OOO:::::::O     \n");
+    gotoxy(start_x, start_y + 6);
+    printf(" G:::::G       GGGGGGO::::::O   O::::::O     \n");
+    gotoxy(start_x, start_y + 7);
+    printf("G:::::G              O:::::O     O:::::O     \n");
+    gotoxy(start_x, start_y + 8);
+    printf("G:::::G              O:::::O     O:::::O     \n");
+    gotoxy(start_x, start_y + 9);
+    printf("G:::::G    GGGGGGGGGGO:::::O     O:::::O     \n");
+    gotoxy(start_x, start_y + 10);
+    printf("G:::::G    G::::::::GO:::::O     O:::::O     \n");
+    gotoxy(start_x, start_y + 11);
+    printf("G:::::G    GGGGG::::GO:::::O     O:::::O     \n");
+    gotoxy(start_x, start_y + 12);
+    printf("G:::::G        G::::GO:::::O     O:::::O     \n");
+    gotoxy(start_x, start_y + 13);
+    printf(" G:::::G       G::::GO::::::O   O::::::O     \n");
+    gotoxy(start_x, start_y + 14);
+    printf("  G:::::GGGGGGGG::::GO:::::::OOO:::::::O     \n");
+    gotoxy(start_x, start_y + 15);
+    printf("   GG:::::::::::::::G OO:::::::::::::OO      \n");
+    gotoxy(start_x, start_y + 16);
+    printf("     GGG::::::GGG:::G   OO:::::::::OO        \n");
+    gotoxy(start_x, start_y + 17);
+    printf("        GGGGGG   GGGG     OOOOOOOOO          \n");
+
+    // Print bottom padding 
+    gotoxy(start_x, start_y + 18);
+    printf("                                             \n");
+    gotoxy(start_x, start_y + 19);
+    printf("                                             \n");
+    gotoxy(start_x, start_y + 20);
+    printf("                                             \n");
+    gotoxy(start_x, start_y + 21);
+    printf("                                             \n");
+    gotoxy(start_x, start_y + 22);
+    printf("                                             \n");
+    gotoxy(start_x, start_y + 23);
+    printf("                                             \n");
+
+    gotoxy(start_x, start_y + 25);
+    printf("\t\t\t\t\t\t   PRESS ANY KEY TO START");
+    _getch(); 
+}
+
 
 // draw_board implementation
 void draw_board(int board[][20], int size) {
@@ -127,15 +204,16 @@ void draw_board(int board[][20], int size) {
 int main(){
 	int size;
 	char name1[20], name2[20];
-	node *popNode = TOP;	 //by default, popNode is equal to TOP
 	int player = 1; //default white goes first
 	int i;
+	
+	print_ascii_art();
+	system("cls");
 	
 	printf("Enter size of the board => ");
 	scanf("%d", &size);
 	getchar();
 	
-//	int coordBoard[size][size];
 	
 	printf("Enter name of Player 1 (White) => ");
 	gets(name1);
@@ -168,12 +246,16 @@ int main(){
 		}
 		
 		// Move picking
-		printf("\n%s's turn. Pick a coordinate: ", curName);
+		printf("\n\nNumber of white pieces: %d", countWhite);
+		printf("\nNumber of black pieces: %d", countBlack);
+		printf("\n\n%s's turn. Pick a coordinate: ", curName);
 		scanf("%d %d", &ix, &iy);
 		
 		//check if coordinate picked is occupied
 		if (coordBoard[ix][iy] != 0){
 			printf("\nThat coordinate is already occupied. Try again.");
+			system("cls");
+			draw_board(coordBoard, size);
 			continue;
 		}else{
 			
@@ -203,7 +285,7 @@ int main(){
 					
 					if (coordBoard[curX][curY] == 0){
 						break;
-					}else if (abs(curX - ix) <= 1) && (abs(curY - iy) <= 1)){
+					}else if ((abs(curX - ix) <= 1) && (abs(curY - iy) <= 1) && (coordBoard[curX][curY] == player)){
 						break;
 					}else if (coordBoard[curX][curY] == oppPlayer){
 						createAndPush(curX, curY);
@@ -211,18 +293,15 @@ int main(){
 						curX += moveX[i];
 						curY += moveY[i];
 						
-						//decrease piece count of opposing player
-						switch (player){
-							case 1:
-								countBlack--;
-								break;
-							case 2:
-								countWhite--;
-								break;
-							}
 					}else if (coordBoard[curX][curY] == player){
 						while(TOP != NULL){
 							popCoord();
+							//temp now holds the coordinates
+							//for effects, first clear the cell to be converted
+							coordBoard[temp->coordX][temp->coordY] = 0;
+							draw_board(coordBoard, size);
+							Sleep(500);
+							//now convert it
 							coordBoard[temp->coordX][temp->coordY] = player;
 							//add each turned piece to count
 							switch (player){
@@ -245,20 +324,24 @@ int main(){
 									break;
 							}
 							//drawboard
-              draw_board(coordBoard, size);
+              				draw_board(coordBoard, size);
 						}
 						break;
 					}	
+				}
+				
+				while (TOP != NULL){
+					clearStack();
 				}
 			}
 			
 			if ((countWhite + countBlack) == size * size){
 				if (countWhite > countBlack){
-					printf("White has more pieces on board. White wins!");
+					printf("\n\nWhite has more pieces on board. White wins!");
 				} else if (countBlack > countWhite){
-					printf("Black has more pieces on board. Black wins!");
+					printf("\n\nBlack has more pieces on board. Black wins!");
 				} else if (countBlack == countWhite){
-					printf("White has the same amount of pieces as Black. It's a Tie!");
+					printf("\n\nWhite has the same amount of pieces as Black. It's a Tie!");
 				}
 				
 				return 0;
