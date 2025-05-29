@@ -6,25 +6,6 @@
 #include <mem.h>
 #include <malloc.h>
 
-/*
-Explanation of functions and code structure:
-	Represent the board as a n by n array. Numerically, the board can have 3 states, 0 for empty, 1 for white, and 2 for black. The
-	board is then rendered based on the current state of the array (kaw na bahala dito vhien). 
-		Move checker: checks if a move encloses opposing pieces. Uses a current var as marker of the current coordinate being checked.
-		Checks for every direction (8), and goes through the ff. condition each time a direction is checked:
-			Check if current var is out of bounds !(>= 0 || <= n - 1) - break
-			Check if current var is the same color, but adjacent - break
-			Check if current var is 0 - break
-			Check if current var is opposing color - append current var to an memory stack
-			Check if current var is current color:
-				else - change the states of the coordinates in the memory array to the state of the piece placed, break.
-			After break - clear memory stack
-	Bakit stacks? Can adapt to changing board sizes.
-	
-	-- Gio
-	
-*/
-
 //node
 typedef struct node{
 	int coordX;
@@ -210,6 +191,7 @@ int main(){
 	print_ascii_art();
 	system("cls");
 	
+	
 	printf("Enter size of the board => ");
 	scanf("%d", &size);
 	getchar();
@@ -246,7 +228,7 @@ int main(){
 		}
 		
 		// Move picking
-		printf("\n\nNumber of white pieces: %d", countWhite);
+		printf("\n\n\n\nNumber of white pieces: %d", countWhite);
 		printf("\nNumber of black pieces: %d", countBlack);
 		printf("\n\n%s's turn. Pick a coordinate: ", curName);
 		scanf("%d %d", &ix, &iy);
@@ -254,14 +236,13 @@ int main(){
 		//check if coordinate picked is occupied
 		if (coordBoard[ix][iy] != 0){
 			printf("\nThat coordinate is already occupied. Try again.");
+			getchar();
 			system("cls");
 			draw_board(coordBoard, size);
 			continue;
 		}else{
-			
 			coordBoard[ix][iy] = player;
 			draw_board(coordBoard, size);
-			
 			//first add to count
 			switch (player){
 				case 1:
@@ -271,9 +252,6 @@ int main(){
 					countBlack++;
 					break;
 			}
-			
-			//check surrounding cells
-			
 			//outer for loop for changing directions
 			for (i = 0; i < 8; i++){
 				//initialize cur var positions
@@ -292,7 +270,6 @@ int main(){
 						//move to next cell
 						curX += moveX[i];
 						curY += moveY[i];
-						
 					}else if (coordBoard[curX][curY] == player){
 						while(TOP != NULL){
 							popCoord();
@@ -307,29 +284,18 @@ int main(){
 							switch (player){
 								case 1:
 									countWhite++;
+									countBlack--;
 									break;
 								case 2:
 									countBlack++;
-									break;
-							}
-
-							
-							//decrease the counter for the opposing player
-							switch (oppPlayer){
-								case 1:
 									countWhite--;
 									break;
-								case 2:
-									countBlack--;
-									break;
 							}
-							//drawboard
               				draw_board(coordBoard, size);
 						}
 						break;
 					}	
 				}
-				
 				while (TOP != NULL){
 					clearStack();
 				}
@@ -343,15 +309,10 @@ int main(){
 				} else if (countBlack == countWhite){
 					printf("\n\nWhite has the same amount of pieces as Black. It's a Tie!");
 				}
-				
 				return 0;
 			}
-			
 		}
-		
 		//switch to next player
 		player = oppPlayer;
 	}
-	
-	
 }
