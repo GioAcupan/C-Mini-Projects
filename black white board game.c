@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <windows.h>
 #include <string.h>
+#include <math.h>
 #include <mem.h>
 #include <malloc.h>
 
@@ -68,21 +69,6 @@ void popCoord(){
 	popNode = TOP;
 	
 	//after calling this function, temp node pointer will now hold the coordinates.
-}
-
-//function that checks if two coordinates are next to each other
-int distanceCheck(int dist1, int dist2){
-	int difference = dist1 - dist2;
-	int acceptableDistance[3] = {-1, 0, 1};
-	int i;
-	
-	for (i = 0; i < 3; i++){
-		if (difference == acceptableDistance[i]){
-			return 1;
-		}
-	}
-	
-	return 0;
 }
 
 int main(){
@@ -164,7 +150,7 @@ int main(){
 					
 					if (coordBoard[curX][curY] == 0){
 						break;
-					}else if ((distanceCheck(ix, curX) == 1) && (distanceCheck(iy, curY) == 1)){
+					}else if (abs(curX - ix) <= 1) && (abs(curY - iy) <= 1)){
 						break;
 					}else if (coordBoard[curX][curY] == oppPlayer){
 						createAndPush(curX, curY);
@@ -182,6 +168,15 @@ int main(){
 									break;
 								case 2:
 									countBlack++;
+									break;
+							}
+							//decrease the counter for the opposing player
+							switch (oppPlayer){
+								case 1:
+									countWhite--;
+									break;
+								case 2:
+									countBlack--;
 									break;
 							}
 							//drawboard
